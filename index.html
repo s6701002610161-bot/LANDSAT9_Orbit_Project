@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <script src="https://cdn.jsdelivr.net/npm/satellite.js@6.0.2/dist/satellite.min.js"></script>
+   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LANDSAT 9 Orbit Analysis</title>
+    <style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background:
+            radial-gradient(circle at 20% 20%, rgba(45, 80, 150, 0.25), transparent 30%),
+            radial-gradient(circle at 80% 70%, rgba(80, 40, 150, 0.20), transparent 30%),
+            #050816;
+        color: #e8eefc;
+        min-height: 100vh;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 0 60px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .header .tag {
+        display: inline-block;
+        padding: 6px 14px;
+        border: 1px solid #3d5a99;
+        border-radius: 20px;
+        color: #8fb4ff;
+        font-size: 13px;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 42px;
+        letter-spacing: 2px;
+    }
+
+    .subtitle {
+        margin-top: 10px;
+        color: #8e9ab5;
+        font-size: 16px;
+    }
+
+    .box {
+        background: rgba(15, 23, 45, 0.88);
+        border: 1px solid #26375f;
+        border-radius: 16px;
+        padding: 25px;
+        margin-top: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .box h2 {
+        margin-top: 0;
+        color: #9fc1ff;
+        font-size: 20px;
+    }
+
+    textarea {
+        width: 100%;
+        height: 100px;
+        resize: vertical;
+        background: #080d1d;
+        color: #dce7ff;
+        border: 1px solid #334875;
+        border-radius: 10px;
+        padding: 14px;
+        font-family: monospace;
+        font-size: 14px;
+        line-height: 1.6;
+        outline: none;
+    }
+
+    textarea:focus {
+        border-color: #6f9cff;
+    }
+
+    button {
+        margin-top: 15px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        background: #3867d6;
+        color: white;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #4b7cf0;
+        transform: translateY(-1px);
+    }
+
+    #results {
+        margin-top: 20px;
+        line-height: 1.9;
+    }
+
+    .parameter {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #202d4a;
+    }
+
+    .parameter:last-child {
+        border-bottom: none;
+    }
+
+    .parameter .name {
+        color: #8e9ab5;
+    }
+
+    .parameter .value {
+        color: #e8eefc;
+        font-weight: bold;
+    }
+
+    .section-title {
+        margin-top: 35px;
+        margin-bottom: 10px;
+        color: #9fc1ff;
+        font-size: 14px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 45px;
+        color: #596783;
+        font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+        .container {
+            width: 94%;
+        }
+
+        h1 {
+            font-size: 30px;
+        }
+
+        .parameter {
+            flex-direction: column;
+            gap: 3px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <div class="tag">SPACE FLIGHT MECHANICS</div>
+
+            <h1>LANDSAT 9</h1>
+
+            <div class="subtitle">
+                Orbital Analysis & Ground Track Visualization
+            </div>
+        </div>
+
+
+        <div class="box">
+
+            <h2>🛰️ TLE DATA</h2>
+
+            <textarea id="tle">LANDSAT 9
+1 49260U 21088A   26280.12838436  .00000183  00000+0  50672-4 0  9998
+2 49260  98.2173 348.8848 0001408  88.6771 271.4589 14.57107850267308</textarea>
+
+            <button onclick="calculateOrbit()">
+                Calculate Orbit
+            </button>
+
+        </div>
+
+
+        <div class="section-title">
+            ORBITAL PARAMETERS
+        </div>
+
+        <div class="box">
+
+            <div id="results">
+                <div class="parameter">
+                    <span class="name">Status</span>
+                    <span class="value">Ready</span>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="section-title">
+            GROUND TRACK
+        </div>
+
+        <div class="box">
+
+            <h2>🌍 Ground Track</h2>
+
+            <div id="groundTrack">
+                Ground track visualization will appear here.
+            </div>
+
+        </div>
+
+
+        <div class="section-title">
+            BANGKOK VISIBILITY
+        </div>
+
+        <div class="box">
+
+            <h2>📡 Satellite Visibility</h2>
+
+            <div id="visibility">
+                Bangkok visibility analysis will appear here.
+            </div>
+
+        </div>
+
+
+        <div class="footer">
+            LANDSAT 9 • Space Flight Mechanics Project
+        </div>
+
+    </div>
+
+</body>
+</html>
+<script>
+function calculateOrbit() {
+
+    // Get TLE from the text box
+    const tleText = document.getElementById("tle").value.trim();
+    const lines = tleText.split("\n");
+
+    // Check that the user entered two TLE lines
+    if (lines.length < 2) {
+        alert("Please enter the two TLE lines.");
+        return;
+    }
+
+    const line1 = lines.find(line => line.trim().startsWith("1 "));
+const line2 = lines.find(line => line.trim().startsWith("2 "));
+
+if (!line1 || !line2) {
+    alert("Please enter a valid TLE.");
+    return;
+}
+    
+
+    // Read orbital elements from TLE Line 2
+    const inclination = parseFloat(line2.substring(8, 16));
+    const raan = parseFloat(line2.substring(17, 25));
+    const eccentricity = parseFloat("0." + line2.substring(26, 33));
+    const argumentOfPerigee = parseFloat(line2.substring(34, 42));
+    const meanAnomaly = parseFloat(line2.substring(43, 51));
+    const meanMotion = parseFloat(line2.substring(52, 63));
+
+    // Earth's gravitational parameter
+    const mu = 398600.4418; // km^3/s^2
+
+    // Convert mean motion from revolutions/day to rad/s
+    const n = meanMotion * 2 * Math.PI / 86400;
+
+    // Calculate semi-major axis
+    const semiMajorAxis = Math.pow(mu / (n * n), 1 / 3);
+
+    // Calculate orbital period
+    const periodMinutes = 1440 / meanMotion;
+
+    // Display results
+    document.getElementById("results").innerHTML = `
+        <h2>Orbital Elements</h2>
+
+        <p><strong>Semi-major axis (a):</strong>
+        ${semiMajorAxis.toFixed(3)} km</p>
+
+        <p><strong>Eccentricity (e):</strong>
+        ${eccentricity.toFixed(7)}</p>
+
+        <p><strong>Inclination (i):</strong>
+        ${inclination.toFixed(4)}°</p>
+
+        <p><strong>RAAN (Ω):</strong>
+        ${raan.toFixed(4)}°</p>
+
+        <p><strong>Argument of Perigee (ω):</strong>
+        ${argumentOfPerigee.toFixed(4)}°</p>
+
+        <p><strong>Mean Anomaly (M):</strong>
+        ${meanAnomaly.toFixed(4)}°</p>
+
+        <p><strong>Orbital Period:</strong>
+        ${periodMinutes.toFixed(3)} minutes</p>
+    `;
+    generateGroundTrack();
+    calculateBangkokVisibility();
+}
+function calculateBangkokVisibility() {
+
+    const tleText = document.getElementById("tle").value.trim();
+    const lines = tleText.split("\n");
+
+    const line1 = lines.find(line => line.trim().startsWith("1 "));
+    const line2 = lines.find(line => line.trim().startsWith("2 "));
+
+    if (!line1 || !line2) {
+        alert("Invalid TLE.");
+        return;
+    }
+
+    const satrec = satellite.twoline2satrec(
+        line1.trim(),
+        line2.trim()
+    );
+
+    // Read TLE epoch
+    const epochYear = parseInt(line1.substring(18, 20));
+    const epochDay = parseFloat(line1.substring(20, 32));
+
+    const year = epochYear < 57
+        ? 2000 + epochYear
+        : 1900 + epochYear;
+
+    const startDate = new Date(Date.UTC(year, 0, 1));
+
+    startDate.setTime(
+        startDate.getTime() +
+        (epochDay - 1) * 86400000
+    );
+
+    // Bangkok observer
+    const observer = {
+        latitude: satellite.degreesToRadians(13.75),
+        longitude: satellite.degreesToRadians(100.52),
+        height: 0
+    };
+
+    const minimumElevation =
+        satellite.degreesToRadians(5);
+
+    let visibleSeconds = 0;
+    let passCount = 0;
+    let wasVisible = false;
+
+    // Check every 10 seconds for 24 hours
+    for (let seconds = 0; seconds <= 86400; seconds += 10) {
+
+        const currentDate = new Date(
+            startDate.getTime() + seconds * 1000
+        );
+
+        const positionAndVelocity =
+            satellite.propagate(satrec, currentDate);
+
+        const positionEci = positionAndVelocity.position;
+
+        if (!positionEci) {
+            continue;
+        }
+
+        const gmst = satellite.gstime(currentDate);
+
+        const positionEcf =
+            satellite.eciToEcf(positionEci, gmst);
+
+        const lookAngles =
+            satellite.ecfToLookAngles(
+                observer,
+                positionEcf
+            );
+
+        const elevation = lookAngles.elevation;
+
+        const isVisible =
+            elevation >= minimumElevation;
+
+        if (isVisible) {
+            visibleSeconds += 10;
+
+            if (!wasVisible) {
+                passCount++;
+            }
+        }
+
+        wasVisible = isVisible;
+    }
+
+    const hours =
+        Math.floor(visibleSeconds / 3600);
+
+    const minutes =
+        Math.floor((visibleSeconds % 3600) / 60);
+
+    const seconds =
+        visibleSeconds % 60;
+
+    document.getElementById("visibility").innerHTML = `
+        <div class="parameter">
+            <span class="name">Location</span>
+            <span class="value">Bangkok</span>
+        </div>
+
+        <div class="parameter">
+            <span class="name">Minimum Elevation</span>
+            <span class="value">5°</span>
+        </div>
+
+        <div class="parameter">
+            <span class="name">Total Visibility</span>
+            <span class="value">
+                ${hours} h ${minutes} min ${seconds} sec
+            </span>
+        </div>
+
+        <div class="parameter">
+            <span class="name">Number of Passes</span>
+            <span class="value">${passCount}</span>
+        </div>
+
+        <div class="parameter">
+            <span class="name">Analysis Period</span>
+            <span class="value">24 hours</span>
+        </div>
+    `;
+}
+function generateGroundTrack() {
+
+    const tleText = document.getElementById("tle").value.trim();
+    const lines = tleText.split("\n");
+
+    const line1 = lines.find(line => line.trim().startsWith("1 "));
+    const line2 = lines.find(line => line.trim().startsWith("2 "));
+
+    if (!line1 || !line2) {
+        alert("Invalid TLE.");
+        return;
+    }
+
+    // Create satellite model from TLE
+    const satrec = satellite.twoline2satrec(
+        line1.trim(),
+        line2.trim()
+    );
+
+    // Read TLE epoch
+    const epochYear = parseInt(line1.substring(18, 20));
+    const epochDay = parseFloat(line1.substring(20, 32));
+
+    const year = epochYear < 57
+        ? 2000 + epochYear
+        : 1900 + epochYear;
+
+    const startDate = new Date(Date.UTC(year, 0, 1));
+
+    startDate.setTime(
+        startDate.getTime() +
+        (epochDay - 1) * 86400000
+    );
+
+    // Ground track data
+    const latitudes = [];
+    const longitudes = [];
+
+    // Calculate position every 60 seconds for 24 hours
+    for (let seconds = 0; seconds <= 86400; seconds += 60) {
+
+        const currentDate = new Date(
+            startDate.getTime() + seconds * 1000
+        );
+
+        const positionAndVelocity =
+            satellite.propagate(satrec, currentDate);
+
+        const positionEci = positionAndVelocity.position;
+
+        if (!positionEci) {
+            continue;
+        }
+
+        const gmst = satellite.gstime(currentDate);
+
+        const geodetic =
+            satellite.eciToGeodetic(positionEci, gmst);
+
+        const latitude =
+            satellite.radiansToDegrees(geodetic.latitude);
+
+        const longitude =
+            satellite.radiansToDegrees(geodetic.longitude);
+
+        latitudes.push(latitude);
+        longitudes.push(longitude);
+    }
+
+    // Plot the ground track
+    const trace = {
+        type: "scattergeo",
+        mode: "lines",
+        lat: latitudes,
+        lon: longitudes,
+        line: {
+            width: 2
+        },
+        name: "LANDSAT 9"
+    };
+
+    const layout = {
+        title: "LANDSAT 9 Ground Track — 24 Hours",
+        height: 500,
+        geo: {
+            projection: {
+                type: "equirectangular"
+            },
+            showland: true,
+            showcountries: true,
+            showcoastlines: true,
+            coastlinecolor: "#888",
+            countrycolor: "#555",
+            landcolor: "#18233d",
+            oceancolor: "#050b1c",
+            showocean: true,
+            lonaxis: {
+                range: [-180, 180]
+            },
+            lataxis: {
+                range: [-90, 90]
+            }
+        },
+        paper_bgcolor: "transparent",
+        plot_bgcolor: "transparent",
+        font: {
+            color: "white"
+        }
+    };
+
+    Plotly.newPlot(
+        "groundTrack",
+        [trace],
+        layout,
+        {
+            responsive: true
+        }
+    );
+}
+</script>
+</script>
+</div>
+
+<div class="box" id="results">
+    <h2>Orbital Elements</h2>
+    <p>Enter TLE data and click Calculate.</p>
+</div>
+
+</body>
+</html>
